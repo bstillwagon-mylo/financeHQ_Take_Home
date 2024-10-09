@@ -1,25 +1,29 @@
-# Dockerfile
 FROM node:18-alpine
 
 WORKDIR /app
 
+# Install OpenSSL and other necessary build tools
+RUN apk add --no-cache openssl
+
 # Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy source code
+# Copy Prisma schema
+COPY prisma ./prisma/
+
+# Copy the rest of the application
 COPY . .
 
-# Build TypeScript code
-RUN npm run build
+# Don't generate Prisma Client here - we'll do it in the entrypoint
+# Don't build here - we'll do it in the entrypoint for development mode
 
-# Run tests
-RUN npm test
-
-# Expose port
 EXPOSE 4000
 
-# Start the application
-CMD ["npm", "start"]
+# Use an entrypoint script
+COPY docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+# Default command (can be overridden in docker-compose)
+CMD ["npm", "run", "dev"]
