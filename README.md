@@ -1,6 +1,4 @@
-# financeHQ_Take_Home
-
-Initial commit contains the scaffolding for the backend events service.
+# Take Home Event Service w/ Graphql
 
 Frameworks used w/Typescript:
 - Express
@@ -11,15 +9,16 @@ To run with Docker:
 
 `docker-compose up --build`
 
-Using Postman, use this url once the docker build is complete:
+Using Postman, use this url once the docker build is complete to query the graph:
 
 `http://0.0.0.0:4000/graphql`
 
 Next Steps:
 1. Include token validation on queries
-    - This should skip the createUser mutation
+    - This should not include the createUser mutation as it would not have a login.
     - I had a validation at the app level, but it prevented user creation
-2. Fix the users query (currently error on ID! being required)
+2. Add tests
 3. Add 24 hour cancellation check
-4. Add Github Actions yml
-5. Add tests
+4. Add Approval and Public/Private events
+5. Add Upcoming vs Past events
+5. Add Github Actions yml
