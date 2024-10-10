@@ -2,11 +2,12 @@ import { gql } from 'apollo-server-express';
 
 export const typeDefs = gql`
   type User {
-    id: ID!
+    id: ID
     name: String!
     email: String!
-    password: String!
-    registrations: [Registration!]!
+    password: String
+    token: String
+    registrations: [Registration]!
   }
 
   type Event {
@@ -16,7 +17,7 @@ export const typeDefs = gql`
     date: String!
     capacity: Int!
     category: String!
-    registrations: [Registration!]!
+    registrations: [Registration]!
     availableSpots: Int!
   }
 
@@ -62,19 +63,25 @@ export const typeDefs = gql`
   }
 
   type Query {
-    users: [User!]!
-    user(id: ID!): User
+    users: [User]
+    user(id: ID): User
     events(
       pagination: PaginationInput!
       filter: EventFilterInput
     ): EventConnection!
     event(id: ID!): Event
-    registrations: [Registration!]!
+    registrations: [Registration]!
+  }
+  
+  input LoginInput {
+    email: String!
+    password: String!
   }
 
   input CreateUserInput {
     name: String!
     email: String!
+    password: String!
   }
 
   input CreateEventInput {
@@ -91,6 +98,7 @@ export const typeDefs = gql`
   }
 
   type Mutation {
+    login(input: LoginInput!): User!
     createUser(input: CreateUserInput!): User!
     createEvent(input: CreateEventInput!): Event!
     createRegistration(input: CreateRegistrationInput!): Registration!
