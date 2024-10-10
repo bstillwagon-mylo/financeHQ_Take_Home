@@ -1,11 +1,10 @@
-import { Prisma, PrismaClient, RegistrationStatus } from '@prisma/client';
+import { Prisma, RegistrationStatus } from '@prisma/client';
 import { Context } from '../context';
 import { 
   ValidationError, 
   NotFoundError,
   PaginationInput,
-  EventFilterInput,
-  Event
+  EventFilterInput
 } from '../types';
 
 export const resolvers = {
@@ -68,7 +67,7 @@ export const resolvers = {
     },
   },
   Mutation: {
-    createUser: async (_: any, { input }: { input: { name: string; email: string } }, { prisma }: Context) => {
+    createUser: async (_: any, { input }: { input: { name: string; email: string, password: string } }, { prisma }: Context) => {
       if (!input.email.includes('@')) {
         throw new ValidationError('Invalid email format');
       }
