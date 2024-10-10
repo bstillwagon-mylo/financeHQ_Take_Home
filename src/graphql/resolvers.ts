@@ -1,12 +1,14 @@
-import { Prisma, PrismaClient, RegistrationStatus } from '@prisma/client';
+import { Prisma, RegistrationStatus } from '@prisma/client';
 import { Context } from '../context';
 import { 
   ValidationError, 
   NotFoundError,
   PaginationInput,
-  EventFilterInput,
-  Event
+  EventFilterInput
 } from '../types';
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import { AuthenticationError } from 'apollo-server-express';
 
 export const resolvers = {
   Query: {
@@ -68,10 +70,31 @@ export const resolvers = {
     },
   },
   Mutation: {
-    createUser: async (_: any, { input }: { input: { name: string; email: string } }, { prisma }: Context) => {
+    login: async(_: any, {input}: {input: {email: string, password: string}}, {prisma}: Context) => {
+      if(!input.email || !input.password) {
+        throw new AuthenticationError('Invalid Credentials')
+      }
+
+      const user = await prisma.user.findFirst({ where: {email: input.email}})
+      let userMutation
+      if(user && await bcrypt.compare(input.password, user.password)) {
+        let token = jwt.sign(user, process.env.JWT_SECRET || 'secret', {expiresIn: '1h'})
+        userMutation = {...user, token: token}
+      } else (error: any) => {
+        throw new AuthenticationError('Invalid Credentials')
+
+      }
+      return userMutation
+
+    },
+    
+    createUser: async (_: any, { input }: { input: { name: string; email: string, password: string }}, { prisma }: Context) => {
       if (!input.email.includes('@')) {
         throw new ValidationError('Invalid email format');
       }
+      
+      input.password = await bcrypt.hash(input.password, Number(process.env.SALT_ROUNDS) || 1)
+
 
       try {
         return await prisma.user.create({
